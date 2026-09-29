@@ -4,7 +4,9 @@
 	"main": "./src/worker.ts",
 	"compatibility_date": "2026-02-24",
 	"compatibility_flags": ["nodejs_compat"],
-	"vars": { "EMDASH_SITE_URL": "https://nv0j-emdash.ravegrunt.workers.dev" },
+	"vars": { "EMDASH_SITE_URL": "https://nv0j.com" },
+	// nv0j.com must be detached from the old nv0j-hugo Worker before this deploys.
+	"routes": [{ "pattern": "nv0j.com", "custom_domain": true }],
 	"d1_databases": [
 		{
 			"binding": "DB",
