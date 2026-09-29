@@ -7,6 +7,8 @@
 	"vars": { "EMDASH_SITE_URL": "https://nv0j.com" },
 	// nv0j.com must be detached from the old nv0j-hugo Worker before this deploys.
 	"routes": [{ "pattern": "nv0j.com", "custom_domain": true }],
+	// Serve only on nv0j.com; the workers.dev address would duplicate the site.
+	"workers_dev": false,
 	"d1_databases": [
 		{
 			"binding": "DB",
