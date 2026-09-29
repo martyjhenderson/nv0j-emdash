@@ -1,0 +1,30 @@
+---
+import { getTaxonomyTermsWithCacheHint } from "emdash";
+import Base from "../../layouts/Base.astro";
+
+const termsResult = await getTaxonomyTermsWithCacheHint("tag", { includeCounts: true });
+if (Astro.cache?.enabled) Astro.cache.set(termsResult.cacheHint);
+
+// Hugo's .Data.Terms.ByCount: most-used first, unused tags hidden.
+const terms = termsResult.data
+	.filter((t) => (t.count ?? 0) > 0)
+	.sort((a, b) => (b.count ?? 0) - (a.count ?? 0) || a.label.localeCompare(b.label));
+---
+
+<Base title="Tags">
+	<div class="wrap">
+		<header class="log-head">
+			<div class="eyebrow">Index <span class="rule"></span></div>
+			<h1>Tags</h1>
+		</header>
+		<div class="chips">
+			{
+				terms.map((t) => (
+					<a href={`/tags/${t.slug}/`} class="chip">
+						{t.label} <span class="count">· {t.count}</span>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</Base>

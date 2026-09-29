@@ -1,0 +1,81 @@
+---
+import { getEmDashCollection, getTermsForEntries } from "emdash";
+import Base from "../../layouts/Base.astro";
+import { entryPath, isoDate, shortDate } from "../../utils/log";
+
+const cursor = Astro.url.searchParams.get("cursor") || undefined;
+const {
+	entries: posts,
+	cacheHint,
+	nextCursor,
+} = await getEmDashCollection("posts", {
+	orderBy: { published_at: "desc" },
+	limit: 20,
+	cursor,
+});
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+
+const tagsByEntry = await getTermsForEntries(
+	"posts",
+	posts.map((p) => p.data.id),
+	"tag",
+);
+---
+
+<Base title="Log" description="Field notes, POTA activations, and antenna misadventures from NV0J.">
+	<div class="wrap">
+		<header class="log-head">
+			<div class="eyebrow">Field Log EN41ew <span class="rule"></span></div>
+			<h1>Log</h1>
+		</header>
+
+		{
+			posts.length === 0 ? (
+				<p class="empty">Nothing logged yet.</p>
+			) : (
+				<section class="entries">
+					{posts.map((post) => {
+						const date = post.data.publishedAt;
+						const tags = tagsByEntry.get(post.data.id) ?? [];
+						return (
+							<article class="entry">
+								<aside class="rail">
+									{date && (
+										<time class="date" datetime={isoDate(date)}>
+											{shortDate(date)}
+										</time>
+									)}
+								</aside>
+								<div class="body">
+									<h2>
+										<a href={entryPath(post.id, date)}>{post.data.title}</a>
+									</h2>
+									{post.data.excerpt && <div class="excerpt">{post.data.excerpt}</div>}
+									{tags.length > 0 && (
+										<div class="meta">
+											{tags.map((t) => (
+												<>
+													<span class="chip band">{t.label}</span>{" "}
+												</>
+											))}
+										</div>
+									)}
+								</div>
+							</article>
+						);
+					})}
+				</section>
+			)
+		}
+
+		{
+			nextCursor && (
+				<nav class="pager">
+					<span />
+					<a href={`/log?cursor=${encodeURIComponent(nextCursor)}`}>Older entries →</a>
+				</nav>
+			)
+		}
+	</div>
+</Base>

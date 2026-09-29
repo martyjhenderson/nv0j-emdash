@@ -1,466 +1,93 @@
 ---
-import {
-	getEmDashCollection,
-	getTermsForEntries,
-	getSiteSettings,
-} from "emdash";
-import { Image } from "emdash/ui";
 import Base from "../layouts/Base.astro";
-import PostCard from "../components/PostCard.astro";
-import { getReadingTime } from "../utils/reading-time";
-import { resolveBlogSiteIdentity } from "../utils/site-identity";
-
-// Limit to what we render (1 featured + 6 grid). The DB does the slicing
-// instead of fetching every post and discarding the tail in JS.
-const POSTS_PER_PAGE = 7;
-
-const [{ entries: posts, cacheHint }, settings] = await Promise.all([
-	getEmDashCollection("posts", {
-		orderBy: { published_at: "desc" },
-		limit: POSTS_PER_PAGE + 1, // +1 to detect "view all" need
-	}),
-	getSiteSettings(),
-]);
-const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
-
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
-
-// Trim the lookahead post used to detect overflow
-const visiblePosts = posts.slice(0, POSTS_PER_PAGE);
-const hasMorePosts = posts.length > POSTS_PER_PAGE;
-
-// Find the first post with a featured image for the hero
-const featuredPost = visiblePosts.find((p) => p.data.featured_image);
-const featuredIndex = featuredPost ? visiblePosts.indexOf(featuredPost) : -1;
-
-// Get remaining posts (exclude featured if found, limit to 6 for grid)
-const gridPosts = visiblePosts
-	.filter((_, i) => i !== featuredIndex)
-	.slice(0, 6);
-
-// Single batched query for tags across the featured post + grid posts.
-// Avoids the N+1 pattern of calling getEntryTerms() per entry.
-// Bylines are already hydrated on entry.data.bylines by getEmDashCollection.
-const tagEntryIds = [
-	...(featuredPost ? [featuredPost.data.id] : []),
-	...gridPosts.map((p) => p.data.id),
-];
-const tagsByEntry = await getTermsForEntries("posts", tagEntryIds, "tag");
-
-const featuredTags = featuredPost
-	? (tagsByEntry.get(featuredPost.data.id) ?? []).map((t) => ({
-			slug: t.slug,
-			label: t.label,
-		}))
-	: [];
-const featuredBylines = featuredPost?.data.bylines ?? [];
-
-const gridPostsWithTags = gridPosts.map((post) => ({
-	post,
-	tags: (tagsByEntry.get(post.data.id) ?? []).map((t) => ({
-		slug: t.slug,
-		label: t.label,
-	})),
-	bylines: post.data.bylines ?? [],
-}));
-
-// Format date helper
-function formatDate(date: Date | null | undefined) {
-	if (!date) return null;
-	return date.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
-}
 ---
 
-<Base title={siteTitle} description={siteTagline}>
-	{
-		posts.length === 0 ? (
-			<section class="empty-state">
-				<h1>No posts yet</h1>
-				<p>Create your first post in the admin panel.</p>
-				<a href="/_emdash/admin/content/posts/new" class="btn">
-					Create a post
+<Base title="NV0J QTH" front>
+	<div class="station">
+		<p class="eyebrow">
+			<span class="tick" aria-hidden="true"></span>
+			<span>Amateur Radio Station</span>
+			<span class="rule" aria-hidden="true"></span>
+			<span>EN41ew</span>
+		</p>
+
+		<header class="hero">
+			<h1 class="callsign">NV<span class="z">0</span>J</h1>
+			<p class="phonetic">
+				<b>N</b>ovember · <b>V</b>ictor · <b>Z</b>ero · <b>J</b>uliett
+			</p>
+		</header>
+
+  <figure class="scope" role="img" aria-label="Spectrum scope showing an active 20 metre band with several signals.">
+    <span class="band-tag">RX <b>14.074 MHz</b> · 20 m</span>
+    <svg viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="nv0j-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#5bd6c0" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="#5bd6c0" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="nv0j-sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#ffb454" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#ffb454" stop-opacity="0.55"/>
+        </linearGradient>
+      </defs>
+
+      <!-- graticule -->
+      <g stroke="#1e2a3a" stroke-width="1">
+        <line x1="0" y1="55"  x2="1000" y2="55"/>
+        <line x1="0" y1="110" x2="1000" y2="110"/>
+        <line x1="0" y1="165" x2="1000" y2="165"/>
+        <line x1="250" y1="0" x2="250" y2="220"/>
+        <line x1="500" y1="0" x2="500" y2="220"/>
+        <line x1="750" y1="0" x2="750" y2="220"/>
+      </g>
+
+      <!-- filled area -->
+      <path d="M 0.0,180.6 L 3.8,182.3 L 7.7,183.0 L 11.5,174.7 L 15.4,178.4 L 19.2,177.2 L 23.1,178.7 L 26.9,180.6 L 30.8,176.8 L 34.6,178.5 L 38.5,176.2 L 42.3,177.5 L 46.2,175.6 L 50.0,180.0 L 53.8,183.1 L 57.7,183.2 L 61.5,176.8 L 65.4,183.0 L 69.2,177.6 L 73.1,178.0 L 76.9,184.1 L 80.8,176.2 L 84.6,184.4 L 88.5,175.2 L 92.3,175.5 L 96.2,182.3 L 100.0,176.5 L 103.8,176.0 L 107.7,182.1 L 111.5,175.0 L 115.4,179.2 L 119.2,167.6 L 123.1,166.0 L 126.9,156.9 L 130.8,159.5 L 134.6,147.1 L 138.5,132.8 L 142.3,121.1 L 146.2,114.1 L 150.0,95.8 L 153.8,88.3 L 157.7,89.8 L 161.5,91.1 L 165.4,89.1 L 169.2,99.3 L 173.1,106.5 L 176.9,120.0 L 180.8,133.0 L 184.6,148.3 L 188.5,156.8 L 192.3,161.3 L 196.2,164.5 L 200.0,172.3 L 203.8,171.9 L 207.7,176.1 L 211.5,173.6 L 215.4,176.8 L 219.2,180.8 L 223.1,183.1 L 226.9,184.0 L 230.8,184.3 L 234.6,175.3 L 238.5,175.2 L 242.3,176.5 L 246.2,183.6 L 250.0,177.5 L 253.8,183.4 L 257.7,175.0 L 261.5,177.6 L 265.4,176.6 L 269.2,178.1 L 273.1,180.2 L 276.9,175.5 L 280.8,174.2 L 284.6,182.1 L 288.5,180.0 L 292.3,176.7 L 296.2,177.3 L 300.0,180.3 L 303.8,179.8 L 307.7,174.2 L 311.5,181.8 L 315.4,182.5 L 319.2,177.3 L 323.1,181.8 L 326.9,174.9 L 330.8,181.2 L 334.6,174.6 L 338.5,180.4 L 342.3,174.2 L 346.2,173.6 L 350.0,168.4 L 353.8,162.2 L 357.7,140.7 L 361.5,108.0 L 365.4,63.6 L 369.2,17.3 L 373.1,4.4 L 376.9,4.4 L 380.8,18.4 L 384.6,63.9 L 388.5,104.7 L 392.3,140.0 L 396.2,157.2 L 400.0,175.2 L 403.8,170.9 L 407.7,177.3 L 411.5,176.7 L 415.4,178.6 L 419.2,179.3 L 423.1,174.1 L 426.9,174.9 L 430.8,175.6 L 434.6,184.2 L 438.5,177.8 L 442.3,173.7 L 446.2,176.6 L 450.0,177.4 L 453.8,175.1 L 457.7,179.1 L 461.5,171.5 L 465.4,168.9 L 469.2,174.2 L 473.1,166.2 L 476.9,161.5 L 480.8,159.8 L 484.6,151.2 L 488.5,143.0 L 492.3,137.4 L 496.2,138.1 L 500.0,134.0 L 503.8,121.0 L 507.7,119.1 L 511.5,113.1 L 515.4,110.3 L 519.2,115.8 L 523.1,112.8 L 526.9,117.8 L 530.8,115.5 L 534.6,120.8 L 538.5,130.9 L 542.3,133.6 L 546.2,138.5 L 550.0,148.3 L 553.8,154.5 L 557.7,156.5 L 561.5,165.6 L 565.4,165.0 L 569.2,163.5 L 573.1,167.5 L 576.9,178.2 L 580.8,171.4 L 584.6,173.9 L 588.5,174.9 L 592.3,183.1 L 596.2,175.5 L 600.0,182.1 L 603.8,175.6 L 607.7,181.0 L 611.5,180.6 L 615.4,182.8 L 619.2,175.2 L 623.1,182.3 L 626.9,175.2 L 630.8,179.0 L 634.6,182.9 L 638.5,176.8 L 642.3,176.9 L 646.2,179.9 L 650.0,166.2 L 653.8,163.8 L 657.7,153.2 L 661.5,126.6 L 665.4,104.3 L 669.2,83.8 L 673.1,64.4 L 676.9,46.4 L 680.8,42.2 L 684.6,49.1 L 688.5,69.1 L 692.3,91.4 L 696.2,113.8 L 700.0,140.9 L 703.8,157.5 L 707.7,165.4 L 711.5,169.3 L 715.4,172.6 L 719.2,174.0 L 723.1,179.4 L 726.9,176.7 L 730.8,183.6 L 734.6,180.5 L 738.5,184.1 L 742.3,175.6 L 746.2,173.8 L 750.0,177.4 L 753.8,176.5 L 757.7,180.6 L 761.5,175.8 L 765.4,183.4 L 769.2,179.9 L 773.1,179.5 L 776.9,172.8 L 780.8,178.9 L 784.6,176.7 L 788.5,174.1 L 792.3,161.4 L 796.2,161.4 L 800.0,147.7 L 803.8,145.8 L 807.7,130.7 L 811.5,128.1 L 815.4,110.9 L 819.2,101.8 L 823.1,96.4 L 826.9,94.6 L 830.8,91.4 L 834.6,93.3 L 838.5,97.8 L 842.3,112.6 L 846.2,115.1 L 850.0,125.5 L 853.8,139.9 L 857.7,150.9 L 861.5,150.8 L 865.4,162.1 L 869.2,166.8 L 873.1,166.8 L 876.9,174.1 L 880.8,178.7 L 884.6,175.2 L 888.5,177.8 L 892.3,181.2 L 896.2,176.8 L 900.0,174.7 L 903.8,182.0 L 907.7,175.8 L 911.5,176.5 L 915.4,179.0 L 919.2,182.7 L 923.1,177.5 L 926.9,181.7 L 930.8,182.0 L 934.6,175.4 L 938.5,181.8 L 942.3,183.8 L 946.2,175.5 L 950.0,173.9 L 953.8,181.4 L 957.7,180.3 L 961.5,178.8 L 965.4,176.5 L 969.2,184.7 L 973.1,177.7 L 976.9,182.2 L 980.8,174.6 L 984.6,180.2 L 988.5,174.4 L 992.3,179.8 L 996.2,177.6 L 1000.0,184.4 L 1000,220 L 0,220 Z"
+          fill="url(#nv0j-fill)"/>
+      <path d="M 0.0,180.6 L 3.8,182.3 L 7.7,183.0 L 11.5,174.7 L 15.4,178.4 L 19.2,177.2 L 23.1,178.7 L 26.9,180.6 L 30.8,176.8 L 34.6,178.5 L 38.5,176.2 L 42.3,177.5 L 46.2,175.6 L 50.0,180.0 L 53.8,183.1 L 57.7,183.2 L 61.5,176.8 L 65.4,183.0 L 69.2,177.6 L 73.1,178.0 L 76.9,184.1 L 80.8,176.2 L 84.6,184.4 L 88.5,175.2 L 92.3,175.5 L 96.2,182.3 L 100.0,176.5 L 103.8,176.0 L 107.7,182.1 L 111.5,175.0 L 115.4,179.2 L 119.2,167.6 L 123.1,166.0 L 126.9,156.9 L 130.8,159.5 L 134.6,147.1 L 138.5,132.8 L 142.3,121.1 L 146.2,114.1 L 150.0,95.8 L 153.8,88.3 L 157.7,89.8 L 161.5,91.1 L 165.4,89.1 L 169.2,99.3 L 173.1,106.5 L 176.9,120.0 L 180.8,133.0 L 184.6,148.3 L 188.5,156.8 L 192.3,161.3 L 196.2,164.5 L 200.0,172.3 L 203.8,171.9 L 207.7,176.1 L 211.5,173.6 L 215.4,176.8 L 219.2,180.8 L 223.1,183.1 L 226.9,184.0 L 230.8,184.3 L 234.6,175.3 L 238.5,175.2 L 242.3,176.5 L 246.2,183.6 L 250.0,177.5 L 253.8,183.4 L 257.7,175.0 L 261.5,177.6 L 265.4,176.6 L 269.2,178.1 L 273.1,180.2 L 276.9,175.5 L 280.8,174.2 L 284.6,182.1 L 288.5,180.0 L 292.3,176.7 L 296.2,177.3 L 300.0,180.3 L 303.8,179.8 L 307.7,174.2 L 311.5,181.8 L 315.4,182.5 L 319.2,177.3 L 323.1,181.8 L 326.9,174.9 L 330.8,181.2 L 334.6,174.6 L 338.5,180.4 L 342.3,174.2 L 346.2,173.6 L 350.0,168.4 L 353.8,162.2 L 357.7,140.7 L 361.5,108.0 L 365.4,63.6 L 369.2,17.3 L 373.1,4.4 L 376.9,4.4 L 380.8,18.4 L 384.6,63.9 L 388.5,104.7 L 392.3,140.0 L 396.2,157.2 L 400.0,175.2 L 403.8,170.9 L 407.7,177.3 L 411.5,176.7 L 415.4,178.6 L 419.2,179.3 L 423.1,174.1 L 426.9,174.9 L 430.8,175.6 L 434.6,184.2 L 438.5,177.8 L 442.3,173.7 L 446.2,176.6 L 450.0,177.4 L 453.8,175.1 L 457.7,179.1 L 461.5,171.5 L 465.4,168.9 L 469.2,174.2 L 473.1,166.2 L 476.9,161.5 L 480.8,159.8 L 484.6,151.2 L 488.5,143.0 L 492.3,137.4 L 496.2,138.1 L 500.0,134.0 L 503.8,121.0 L 507.7,119.1 L 511.5,113.1 L 515.4,110.3 L 519.2,115.8 L 523.1,112.8 L 526.9,117.8 L 530.8,115.5 L 534.6,120.8 L 538.5,130.9 L 542.3,133.6 L 546.2,138.5 L 550.0,148.3 L 553.8,154.5 L 557.7,156.5 L 561.5,165.6 L 565.4,165.0 L 569.2,163.5 L 573.1,167.5 L 576.9,178.2 L 580.8,171.4 L 584.6,173.9 L 588.5,174.9 L 592.3,183.1 L 596.2,175.5 L 600.0,182.1 L 603.8,175.6 L 607.7,181.0 L 611.5,180.6 L 615.4,182.8 L 619.2,175.2 L 623.1,182.3 L 626.9,175.2 L 630.8,179.0 L 634.6,182.9 L 638.5,176.8 L 642.3,176.9 L 646.2,179.9 L 650.0,166.2 L 653.8,163.8 L 657.7,153.2 L 661.5,126.6 L 665.4,104.3 L 669.2,83.8 L 673.1,64.4 L 676.9,46.4 L 680.8,42.2 L 684.6,49.1 L 688.5,69.1 L 692.3,91.4 L 696.2,113.8 L 700.0,140.9 L 703.8,157.5 L 707.7,165.4 L 711.5,169.3 L 715.4,172.6 L 719.2,174.0 L 723.1,179.4 L 726.9,176.7 L 730.8,183.6 L 734.6,180.5 L 738.5,184.1 L 742.3,175.6 L 746.2,173.8 L 750.0,177.4 L 753.8,176.5 L 757.7,180.6 L 761.5,175.8 L 765.4,183.4 L 769.2,179.9 L 773.1,179.5 L 776.9,172.8 L 780.8,178.9 L 784.6,176.7 L 788.5,174.1 L 792.3,161.4 L 796.2,161.4 L 800.0,147.7 L 803.8,145.8 L 807.7,130.7 L 811.5,128.1 L 815.4,110.9 L 819.2,101.8 L 823.1,96.4 L 826.9,94.6 L 830.8,91.4 L 834.6,93.3 L 838.5,97.8 L 842.3,112.6 L 846.2,115.1 L 850.0,125.5 L 853.8,139.9 L 857.7,150.9 L 861.5,150.8 L 865.4,162.1 L 869.2,166.8 L 873.1,166.8 L 876.9,174.1 L 880.8,178.7 L 884.6,175.2 L 888.5,177.8 L 892.3,181.2 L 896.2,176.8 L 900.0,174.7 L 903.8,182.0 L 907.7,175.8 L 911.5,176.5 L 915.4,179.0 L 919.2,182.7 L 923.1,177.5 L 926.9,181.7 L 930.8,182.0 L 934.6,175.4 L 938.5,181.8 L 942.3,183.8 L 946.2,175.5 L 950.0,173.9 L 953.8,181.4 L 957.7,180.3 L 961.5,178.8 L 965.4,176.5 L 969.2,184.7 L 973.1,177.7 L 976.9,182.2 L 980.8,174.6 L 984.6,180.2 L 988.5,174.4 L 992.3,179.8 L 996.2,177.6 L 1000.0,184.4"
+          fill="none" stroke="#5bd6c0" stroke-width="1.6"
+          stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+
+      <!-- peak marker over EN41 signal -->
+      <line x1="373" y1="4.4" x2="373" y2="220" stroke="#ffb454" stroke-width="1" stroke-dasharray="2 4" opacity="0.5"/>
+      <circle cx="373" cy="4.4" r="3.2" fill="#ffb454"/>
+
+      <!-- refresh sweep -->
+      <rect class="sweep" x="0" y="0" width="90" height="220" fill="url(#nv0j-sweep)"/>
+    </svg>
+  </figure>
+
+  <!-- Station readout -->
+  <section class="readout" aria-label="Station profile">
+    <div class="row"><span class="k">Grid</span><span class="v hot">EN41ew</span></div>
+    <div class="row"><span class="k">QTH</span><span class="v">Cedar Rapids, Iowa</span></div>
+    <div class="row"><span class="k">License</span><span class="v">Amateur Extra</span></div>
+    <div class="row"><span class="k">Station</span><span class="v">IC-7300 · 50 W · EFHW</span></div>
+    <div class="row"><span class="k">Bands</span><span class="v">20 m primary / 40 m</span></div>
+    <div class="row"><span class="k">Chasing</span><span class="v">Parks on the Air</span></div>
+  </section>
+
+		<section class="notice">
+			<h2>Station <span class="qrv-state">QRV</span> · Blog</h2>
+			<p>
+				The log is open. <b>Field notes, POTA activations, and antenna misadventures</b>, filed as
+				they happen.
+			</p>
+			<a class="qrv-link" href="/log">Enter the log →</a>
+		</section>
+
+		<footer class="sig">
+			<span class="seventythree">73 de <b>NV0J</b></span>
+			<span class="links">
+				<a href="/log">Log</a>
+				<a href="https://www.qrz.com/db/NV0J" rel="me noopener" target="_blank">
+					QRZ <span class="arr" aria-hidden="true">↗</span>
 				</a>
-			</section>
-		) : (
-			<div class="home-content">
-				{/* Featured Post - Side by side */}
-				{featuredPost && (
-					<section class="featured-section">
-						<div class="featured-grid">
-							<a href={`/posts/${featuredPost.id}`} class="featured-image-link">
-								<div class="featured-image" {...featuredPost.edit.featured_image}>
-									<Image image={featuredPost.data.featured_image} />
-								</div>
-							</a>
-							<div class="featured-content">
-								<div class="featured-meta">
-									{featuredBylines.length > 0 && (
-										<>
-											<div class="featured-bylines">
-												{featuredBylines.slice(0, 2).map((credit, index) => (
-													<>
-														{index > 0 && <span class="byline-sep">,</span>}
-														<span class="featured-byline">
-															{credit.byline.avatarMediaId && (
-																<img
-																	src={`/_emdash/api/media/file/${credit.byline.avatarMediaId}`}
-																	alt={credit.byline.displayName}
-																	class="featured-byline-avatar"
-																/>
-															)}
-															<span class="featured-byline-name">
-																{credit.byline.displayName}
-															</span>
-														</span>
-													</>
-												))}
-												{featuredBylines.length > 2 && (
-													<span class="byline-more">
-														+{featuredBylines.length - 2}
-													</span>
-												)}
-											</div>
-											<span class="meta-dot" />
-										</>
-									)}
-									{formatDate(featuredPost.data.publishedAt) && (
-										<time>{formatDate(featuredPost.data.publishedAt)}</time>
-									)}
-									<span class="meta-dot" />
-									<span>
-										{getReadingTime(featuredPost.data.content)} min read
-									</span>
-								</div>
-								<a
-									href={`/posts/${featuredPost.id}`}
-									class="featured-title-link"
-								>
-									<h1 class="featured-title" {...featuredPost.edit.title}>{featuredPost.data.title}</h1>
-								</a>
-								{featuredPost.data.excerpt && (
-									<p class="featured-excerpt" {...featuredPost.edit.excerpt}>{featuredPost.data.excerpt}</p>
-								)}
-								{featuredTags.length > 0 && (
-									<div class="featured-tags">
-										{featuredTags.map((tag) => (
-											<a href={`/tag/${tag.slug}`} class="featured-tag">
-												{tag.label}
-											</a>
-										))}
-									</div>
-								)}
-							</div>
-						</div>
-					</section>
-				)}
-
-				{/* Latest Posts */}
-				{gridPostsWithTags.length > 0 && (
-					<section class="posts-section">
-						<header class="section-header">
-							<h2 class="section-title">Latest</h2>
-							{hasMorePosts && (
-								<a href="/posts" class="section-link">
-									View all
-								</a>
-							)}
-						</header>
-						<div class="posts-grid">
-							{gridPostsWithTags.map(({ post, tags, bylines }) => (
-								<PostCard
-									title={post.data.title ?? "Untitled"}
-									excerpt={post.data.excerpt}
-									featuredImage={post.data.featured_image}
-									href={`/posts/${post.id}`}
-									date={post.data.publishedAt ?? undefined}
-									readingTime={getReadingTime(post.data.content)}
-									tags={tags}
-									bylines={bylines}
-									edit={post.edit}
-								/>
-							))}
-						</div>
-					</section>
-				)}
-			</div>
-		)
-	}
+				<a href="https://pota.app/#/profile/NV0J" rel="noopener" target="_blank">
+					POTA <span class="arr" aria-hidden="true">↗</span>
+				</a>
+			</span>
+		</footer>
+	</div>
 </Base>
-
-<style>
-	.home-content {
-		max-width: var(--wide-width);
-		margin: 0 auto;
-		padding: var(--spacing-16) var(--spacing-6);
-	}
-
-	/* Featured Section - Side by side */
-	.featured-section {
-		margin-bottom: var(--spacing-16);
-	}
-
-	.featured-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-8);
-		align-items: center;
-	}
-
-	.featured-image-link {
-		grid-column: 1 / 3;
-		display: block;
-		/* Extend to viewport edge, but cap at -6rem minimum extension */
-		margin-left: min(
-			-6rem,
-			calc(-1 * (var(--spacing-6) + (100vw - var(--wide-width)) / 2))
-		);
-	}
-
-	.featured-image {
-		overflow: hidden;
-		border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-		background: var(--color-surface);
-	}
-
-	.featured-image img {
-		width: 100%;
-		height: auto;
-		aspect-ratio: 4 / 3;
-		object-fit: cover;
-		transition: transform 0.4s ease;
-	}
-
-	.featured-image-link:hover .featured-image img,
-	.featured-grid:has(.featured-title-link:hover) .featured-image img {
-		transform: scale(1.02);
-	}
-
-	.featured-content {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-4);
-	}
-
-	.featured-meta {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		column-gap: var(--spacing-3);
-		row-gap: var(--spacing-1);
-		font-size: var(--font-size-sm);
-		color: var(--color-muted);
-	}
-
-	.meta-dot {
-		width: 3px;
-		height: 3px;
-		border-radius: 50%;
-		background: var(--color-muted);
-	}
-
-	/* Featured bylines */
-	.featured-bylines {
-		display: flex;
-		align-items: center;
-		gap: 2px;
-	}
-
-	.featured-byline {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--spacing-2);
-	}
-
-	.featured-byline-avatar {
-		width: var(--avatar-size-md);
-		height: var(--avatar-size-md);
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.featured-byline-name {
-		font-weight: 500;
-		color: var(--color-text-secondary);
-	}
-
-	.byline-sep {
-		color: var(--color-muted);
-		margin-right: 2px;
-	}
-
-	.byline-more {
-		font-size: var(--font-size-xs);
-		color: var(--color-muted);
-		margin-left: 2px;
-	}
-
-	.featured-title-link {
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.featured-title {
-		font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-4xl));
-		font-weight: var(--font-weight-display);
-		line-height: var(--leading-tight);
-		letter-spacing: var(--tracking-tight);
-		transition: color var(--transition-fast);
-	}
-
-	.featured-title-link:hover .featured-title,
-	.featured-grid:has(.featured-image-link:hover) .featured-title {
-		color: var(--color-brand);
-	}
-
-	.featured-excerpt {
-		font-size: var(--font-size-lg);
-		line-height: var(--leading-relaxed);
-		color: var(--color-text-secondary);
-	}
-
-	.featured-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spacing-2);
-		margin-top: var(--spacing-2);
-	}
-
-	.featured-tag {
-		display: inline-block;
-		padding: var(--tag-padding-y) var(--spacing-2);
-		font-size: var(--font-size-xs);
-		color: var(--color-text-secondary);
-		background: var(--color-surface);
-		border-radius: var(--radius);
-		text-decoration: none;
-		transition:
-			color var(--transition-fast),
-			background var(--transition-fast);
-	}
-
-	.featured-tag:hover {
-		color: var(--color-text);
-		background: var(--color-border);
-	}
-
-	/* Section header */
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		margin-bottom: var(--spacing-8);
-		padding-bottom: var(--spacing-4);
-		border-bottom: 1px solid var(--color-border-subtle);
-	}
-
-	.section-title {
-		font-size: var(--font-size-sm);
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: var(--tracking-wider);
-		color: var(--color-muted);
-	}
-
-	.section-link {
-		font-size: var(--font-size-sm);
-		color: var(--color-brand);
-		text-decoration: none;
-		transition: color var(--transition-fast);
-	}
-
-	.section-link:hover {
-		color: var(--color-brand-hover);
-	}
-
-	/* Posts Grid */
-	.posts-section {
-	}
-
-	.posts-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-12) var(--spacing-8);
-	}
-
-	/* Empty State */
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--spacing-3);
-		text-align: center;
-		padding: var(--spacing-20) var(--spacing-6);
-		max-width: 400px;
-		margin: 0 auto;
-	}
-
-	.empty-state h2 {
-		font-size: var(--font-size-2xl);
-		font-weight: var(--font-weight-heading);
-	}
-
-	.empty-state p {
-		color: var(--color-muted);
-	}
-
-	.btn {
-		display: inline-block;
-		margin-top: var(--spacing-4);
-		padding: var(--spacing-3) var(--spacing-6);
-		background: var(--color-brand);
-		color: var(--color-on-brand);
-		text-decoration: none;
-		border-radius: var(--radius);
-		font-size: var(--font-size-sm);
-		font-weight: 500;
-		transition: background var(--transition-fast);
-	}
-
-	.btn:hover {
-		background: var(--color-brand-hover);
-	}
-
-	/* Responsive */
-	@media (max-width: 900px) {
-		.home-content {
-			padding: var(--spacing-6) var(--spacing-4) var(--spacing-12);
-		}
-
-		.featured-image-link {
-			margin-left: 0;
-		}
-
-		.featured-grid {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-6);
-		}
-
-		.featured-image {
-			border-radius: var(--radius-lg);
-		}
-
-		.featured-image img {
-			aspect-ratio: 16 / 9;
-		}
-
-		.posts-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: var(--spacing-8) var(--spacing-6);
-		}
-	}
-
-	@media (max-width: 600px) {
-		.featured-title {
-			font-size: var(--font-size-2xl);
-		}
-
-		.posts-grid {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-8);
-		}
-	}
-</style>

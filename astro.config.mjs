@@ -21,16 +21,23 @@ export default defineConfig({
 	fonts: [
 		{
 			provider: fontProviders.google(),
-			name: "Inter",
+			name: "IBM Plex Sans",
 			cssVariable: "--font-body",
-			weights: [400, 500, 600, 700],
-			fallbacks: ["sans-serif"],
+			weights: [400, 500],
+			fallbacks: ["system-ui", "sans-serif"],
 		},
 		{
 			provider: fontProviders.google(),
-			name: "JetBrains Mono",
+			name: "IBM Plex Mono",
 			cssVariable: "--font-mono",
 			weights: [400, 500],
+			fallbacks: ["monospace"],
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Chakra Petch",
+			cssVariable: "--font-display",
+			weights: [600, 700],
 			fallbacks: ["monospace"],
 		},
 	],

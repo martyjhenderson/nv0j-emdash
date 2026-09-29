@@ -42,66 +42,48 @@ This template ships with `.mcp.json`, `.cursor/mcp.json`, and `.vscode/mcp.json`
 - When Astro's cache is enabled, pass content-query hints to `Astro.cache.set(cacheHint)`. Use the `WithCacheHint` variants for site settings, menus, taxonomies, and widget areas rendered by cached routes.
 - Taxonomy names in queries must match the seed's `"name"` field exactly (e.g., `"category"` not `"categories"`).
 
-## This Template
+## This Site
 
-A blog with posts, pages, categories, tags, full-text search, and RSS. Designed for personal writing, technical writing, indie newsletters, and anything where the writing is the product. Editorial-tech aesthetic: confident sans-serif, restrained accent, real article structure with bylines and reading time.
+NV0J QTH -- the amateur radio station site for NV0J (EN41ew, Cedar Rapids, Iowa). A station landing page plus a field log of POTA activations and antenna notes. Ported from a Hugo site using the **NV0J Beacon** theme (dark operating-console readout, SDR spectrum-scope signature). Licence: GPL v2 or later.
 
 ## Pages
 
-| Page        | Path               | What it shows                                                                                          |
-| ----------- | ------------------ | ------------------------------------------------------------------------------------------------------ |
-| Home        | `/`                | Featured post hero (large image + excerpt), latest posts grid                                          |
-| All posts   | `/posts`           | Article count, full post list with excerpts and tag chips                                              |
-| Post detail | `/posts/[slug]`    | Featured image, title, body, left meta column (authors + date), right TOC + search + categories gutter |
-| Search      | `/search`          | Full-text search UI                                                                                    |
-| Page        | `/pages/[slug]`    | Static page content (Portable Text)                                                                    |
-| Category    | `/category/[slug]` | Posts filtered by category                                                                             |
-| Tag         | `/tag/[slug]`      | Posts filtered by tag                                                                                  |
-| RSS         | `/rss.xml`         | Generated feed                                                                                         |
+| Page        | Path                          | What it shows                                                                  |
+| ----------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| Station     | `/`                           | Callsign hero, spectrum scope SVG, station readout, link into the log. No masthead/footer. |
+| Log         | `/log`                        | Logbook list: date rail, title, excerpt, tag chips                             |
+| Log entry   | `/YYYY/MM/DD/slug/`           | Eyebrow, title, date byline, hero image, body, tags, prev/next                 |
+| Short link  | `/log/[slug]`                 | 301 to the dated permalink                                                     |
+| Tags        | `/tags/`, `/tags/[slug]/`     | Tag index by count; entries for one tag                                        |
+| Page        | `/pages/[slug]`               | Static page content (Portable Text)                                            |
+| RSS         | `/rss.xml`                    | Feed. `/index.xml` and `/log/index.xml` (old Hugo feeds) 301 here.             |
+
+Log entry URLs keep the Hugo permalinks and are built from the UTC publish date. `src/utils/log.ts` (`entryPath`) and the posts collection's `urlPattern` (`/{year}/{month}/{day}/{slug}`) must agree. A request with a stale date 301s to the canonical URL.
+
+EmDash redirect rules skip paths with a file extension, so `.xml` aliases are Astro endpoints, not seed redirects.
 
 ## Schema
 
-- `posts` collection: `title`, `featured_image`, `content` (Portable Text), `excerpt` (text).
-- `pages` collection: `title`, `content` (Portable Text). Used for `/about` etc.
-- Taxonomies: `category`, `tag`.
-- Single `primary` menu (Home, About, Posts by default).
+- `posts` collection (admin label "Log"): `title`, `featured_image` (hero), `content` (Portable Text), `excerpt` (text). Comments are off.
+- `pages` collection: `title`, `content`.
+- Taxonomy: `tag` only (band, rig, park reference -- e.g. `20m`, `hf-010`, `us-1449`).
+- `primary` menu: Station (`/`), Log (`/log`). Drives the masthead and footer links.
+- The station readout (grid, QTH, rig, bands) is hard-coded in `src/pages/index.astro`.
 
-Site settings have `title` and `tagline` -- both render in the header / footer.
+Seeds always publish at "now". To backdate an imported entry, publish it with `publishedAt` (`POST /_emdash/api/content/posts/{id}/publish`, needs `content:publish_any`) or set the date in the admin.
 
 ## Visual character
 
-Single typeface: **Inter** on `--font-body`, used for everything including headings (`--font-heading` defaults to the body face; tighter letter-spacing on h1/h2). **JetBrains Mono** on `--font-mono` for inline code and code blocks. Body and headings share the same family; weight and size carry the hierarchy (`--font-weight-heading` 600, `--font-weight-display` 700 for h1/page titles).
+Dark console on a faint scope-graticule grid. All styles are in `src/styles/nv0j.css` (the ported theme stylesheet). `tokens.css`/`theme.css` from the blog template are no longer used.
 
-The brand colour is `#0066cc` (`--color-brand`) -- used for links, the post-card title hover, and the search input focus ring. There's also a secondary text colour (`--color-text-secondary`) and a `--color-muted` for meta info. Don't add a second accent.
-
-The article layout is the standout feature: a three-column reading view with a left meta column (author bylines, date), centred 680px body column, and a right gutter for search, table of contents, and categories. Don't flatten that into one column on desktop -- the layout signals "this is something to read".
-
-## Customisation
-
-Design tokens live in `src/styles/tokens.css` with their default values. To restyle the site, override tokens in `src/styles/theme.css` -- declarations there are unlayered, so they always beat the `@layer base` defaults. Don't edit `tokens.css` or `Base.astro` for visual changes.
-
-Colours are defined with `light-dark(<light>, <dark>)`, so each token carries both modes. Overriding with a plain colour changes light and dark at once; use `light-dark()` in the override to keep them distinct. There is no separate dark palette to maintain.
-
-Webfonts are configured in `astro.config.mjs` under `fonts:`. To swap the body face, change the `name:` for the entry bound to `cssVariable: "--font-body"`. Good alternatives: Geist, IBM Plex Sans, Söhne (if you have a licence), Public Sans. If you want a serif-bodied blog, swap to a humanist serif like Source Serif, Crimson Pro, or Lora -- but then also raise `--font-size-base` to `1.0625rem` for readability. To give headings their own face (or use a system font) without touching the font pipeline, override `--font-heading` or `--font-body` in `theme.css`.
-
-CSS variables worth knowing (see `tokens.css` for the full list):
-
-- `--color-brand`, `--color-brand-hover`, `--color-on-brand`, `--color-brand-ring`
-- `--color-bg`, `--color-bg-subtle`, `--color-surface`, `--color-text`, `--color-text-secondary`, `--color-muted`, `--color-border`, `--color-border-subtle`
-- `--font-body`, `--font-heading`, `--font-mono`
-- `--font-weight-heading` (600) / `--font-weight-display` (700) -- heading weights; lower them if you switch to a serif
-- `--tracking-tight` / `--tracking-snug` / `--tracking-wide` / `--tracking-wider` -- letter-spacing tokens used across headings and meta labels
-- `--content-width` (680px) -- article body column
-- `--wide-width` (1200px) -- max container
-- `--gutter-width` (200px) -- right sidebar (TOC) on article pages
-- `--meta-col-width` (180px) -- left meta column on article pages
-- `--avatar-size-{xs,sm,md,lg}` -- byline avatar sizes at different scales
+- Colours: `--ink` background, `--panel`/`--panel-2` surfaces, `--line`/`--line-2` hairlines, `--text`, `--muted`/`--muted-2`. Two accents with fixed jobs: `--phosphor` (amber: the lit "0", active nav, hot values, hover rails) and `--signal` (teal: links, scope trace, band chips). Don't add a third.
+- Type: **Chakra Petch** (`--font-display`, 600/700) for callsign and headings, **IBM Plex Mono** (`--font-mono`) for UI, labels and meta, **IBM Plex Sans** (`--font-body`) for article prose. Loaded in `astro.config.mjs` under `fonts:`; the stylesheet aliases them as `--f-display`, `--f-mono`, `--f-body`.
+- The callsign always renders as `NV<span class="z">0</span>J` so the zero glows amber.
+- Motion (scope sweep, pulse tick) is disabled under `prefers-reduced-motion`.
 
 ## What not to do
 
-- Don't add a second accent colour or coloured section backgrounds. The page should be black, white, and one blue.
-- Don't replace Inter with a display sans (Bebas, Anton, etc.). Headings rely on weight contrast, not novelty faces.
-- Don't collapse the article gutter on desktop -- it's part of the reading experience.
-- Don't use stock blog copy ("Welcome to my blog", "Stay tuned for more"). Write a real tagline that says what this blog is about.
-- Don't seed the home page with three identical placeholder posts. If you only have one real post, show one real post.
-- Comments are enabled on posts and rendered on the post detail page. Configure moderation before publishing the site, or remove `commentsEnabled` and the comments UI together.
+- Don't add a light mode or coloured section backgrounds; the site is deliberately dark.
+- Don't replace Chakra Petch / IBM Plex with generic sans faces.
+- Don't change the log permalink shape; existing links from the Hugo site depend on it.
+- Don't put the masthead or footer on the station landing page (`front` prop on `Base`).
