@@ -5,8 +5,11 @@
 	"compatibility_date": "2026-02-24",
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": { "EMDASH_SITE_URL": "https://nv0j.com" },
-	// nv0j.com must be detached from the old nv0j-hugo Worker before this deploys.
-	"routes": [{ "pattern": "nv0j.com", "custom_domain": true }],
+	// www.nv0j.com only redirects to nv0j.com (src/outer-middleware.ts).
+	"routes": [
+		{ "pattern": "nv0j.com", "custom_domain": true },
+		{ "pattern": "www.nv0j.com", "custom_domain": true },
+	],
 	// Serve only on nv0j.com; the workers.dev address would duplicate the site.
 	"workers_dev": false,
 	"d1_databases": [
