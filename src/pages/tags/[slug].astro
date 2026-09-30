@@ -50,7 +50,7 @@ if (Astro.cache?.enabled) {
 							</aside>
 							<div class="body">
 								<h2>
-									<a href={entryPath(post.id, date)}>{post.data.title}</a>
+									<a href={entryPath(post.id)}>{post.data.title}</a>
 								</h2>
 								{post.data.excerpt && <div class="excerpt">{post.data.excerpt}</div>}
 							</div>

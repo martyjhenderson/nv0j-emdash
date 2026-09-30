@@ -1,14 +1,10 @@
 /**
- * Log entries keep the Hugo permalinks: /YYYY/MM/DD/slug/ built from the
- * UTC publish date. Must agree with the posts collection's urlPattern
- * ("/{year}/{month}/{day}/{slug}") in seed/seed.json.
+ * Log entries live at EmDash's native /posts/<slug> URL. Must agree with the
+ * posts collection's urlPattern ("/posts/{slug}") in seed/seed.json. Old
+ * Hugo-style /YYYY/MM/DD/<slug>/ links 301 here.
  */
-export function entryPath(slug: string, publishedAt?: Date | null): string {
-	if (!publishedAt) return `/log/${slug}/`;
-	const y = publishedAt.getUTCFullYear();
-	const m = String(publishedAt.getUTCMonth() + 1).padStart(2, "0");
-	const d = String(publishedAt.getUTCDate()).padStart(2, "0");
-	return `/${y}/${m}/${d}/${slug}/`;
+export function entryPath(slug: string): string {
+	return `/posts/${slug}`;
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");

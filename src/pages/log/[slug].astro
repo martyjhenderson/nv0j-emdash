@@ -1,15 +1,14 @@
 ---
-// Short link: /log/<slug> → the dated permalink. Also the fallback that
-// entryPath() produces for an entry without a publish date.
+// Short link: /log/<slug> → /posts/<slug>.
 import { getEmDashEntry, decodeSlug } from "emdash";
 import { entryPath } from "../../utils/log";
 
 const slug = decodeSlug(Astro.params.slug);
 const { entry: post } = slug ? await getEmDashEntry("posts", slug) : { entry: null };
 
-if (!post?.data.publishedAt) {
+if (!post) {
 	return Astro.redirect("/404");
 }
 
-return Astro.redirect(entryPath(post.id, post.data.publishedAt), 301);
+return Astro.redirect(entryPath(post.id), 301);
 ---

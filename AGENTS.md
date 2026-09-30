@@ -52,13 +52,14 @@ NV0J QTH -- the amateur radio station site for NV0J (EN41ew, Cedar Rapids, Iowa)
 | ----------- | ----------------------------- | ------------------------------------------------------------------------------ |
 | Station     | `/`                           | Callsign hero, spectrum scope SVG, station readout, link into the log. No masthead/footer. |
 | Log         | `/log`                        | Logbook list: date rail, title, excerpt, tag chips                             |
-| Log entry   | `/YYYY/MM/DD/slug/`           | Eyebrow, title, date byline, hero image, body, tags, prev/next                 |
-| Short link  | `/log/[slug]`                 | 301 to the dated permalink                                                     |
+| Log entry   | `/posts/[slug]`               | Eyebrow, title, date byline, hero image, body, tags, prev/next                 |
+| Short link  | `/log/[slug]`                 | 301 to `/posts/[slug]`                                                         |
+| Old permalink | `/YYYY/MM/DD/slug/`         | 301 to `/posts/[slug]` (Hugo-era URLs; the date segments are ignored)          |
 | Tags        | `/tags/`, `/tags/[slug]/`     | Tag index by count; entries for one tag                                        |
 | Page        | `/pages/[slug]`               | Static page content (Portable Text)                                            |
 | RSS         | `/rss.xml`                    | Feed. `/index.xml` and `/log/index.xml` (old Hugo feeds) 301 here.             |
 
-Log entry URLs keep the Hugo permalinks and are built from the UTC publish date. `src/utils/log.ts` (`entryPath`) and the posts collection's `urlPattern` (`/{year}/{month}/{day}/{slug}`) must agree. A request with a stale date 301s to the canonical URL.
+Log entries use EmDash's native `/posts/{slug}` URL. `src/utils/log.ts` (`entryPath`) and the posts collection's `urlPattern` (`/posts/{slug}`) must agree.
 
 EmDash redirect rules skip paths with a file extension, so `.xml` aliases are Astro endpoints, not seed redirects.
 
@@ -85,5 +86,5 @@ Dark console on a faint scope-graticule grid. All styles are in `src/styles/nv0j
 
 - Don't add a light mode or coloured section backgrounds; the site is deliberately dark.
 - Don't replace Chakra Petch / IBM Plex with generic sans faces.
-- Don't change the log permalink shape; existing links from the Hugo site depend on it.
+- Don't remove the `/YYYY/MM/DD/slug/` and `/log/[slug]` redirects; older links may still use them.
 - Don't put the masthead or footer on the station landing page (`front` prop on `Base`).

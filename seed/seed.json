@@ -15,7 +15,7 @@
 			"slug": "posts",
 			"label": "Log",
 			"labelSingular": "Log entry",
-			"urlPattern": "/{year}/{month}/{day}/{slug}",
+			"urlPattern": "/posts/{slug}",
 			"supports": ["drafts", "revisions", "preview", "scheduling", "search", "seo"],
 			"fields": [
 				{
